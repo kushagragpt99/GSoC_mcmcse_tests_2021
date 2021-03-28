@@ -5,12 +5,10 @@
 set.seed(10)
 
 # Draw from multivariate normal by eigen decomposition of covariance matrix to speed up the process.
-mvt_normal <- function(n, mu, Sigma) {
+mvt_normal <- function(n, mu, h_root) {
   p = length(mu)
   draws = matrix(0, nrow = p, ncol = n)
-  decomp = eigen(Sigma) # Spectral decomposition
-  sqroot_Sigma = decomp$vectors %*% diag(decomp$values ^ 0.5) %*% solve(decomp$vectors)
-  draws = sapply(1:n, function(t) mu + sqroot_Sigma %*% rnorm(p))
+  draws = sapply(1:n, function(t) mu + rnorm(p, 0, h_root)) 
   draws
 }
 
@@ -25,9 +23,9 @@ RWMH <- function(n, init, h)  {
     accept = 0
     output = matrix(, nrow = n, ncol = p)
     output[1,] = init
-    prop_cov = h*diag(p)  # variance matrix of the proposal
+    h_root = sqrt(h)
     for(t in 2:n) {
-      prop = mvt_normal(1, output[t-1,], prop_cov)
+      prop = mvt_normal(1, output[t-1,], h_root)
       log_ratio = log_unnormalised_posterior(prop) - log_unnormalised_posterior(output[t-1,]) # work with log for numerical stability
       if(log(runif(1)) < log_ratio) {
         output[t,] = prop
@@ -91,8 +89,9 @@ ess <- function(chain)  {
   ess
 }
 
-n = 1e4
-init = numeric(100)
+n = 1e3
+p = 100
+init = numeric(p)
 h = 0.05
 ans = RWMH(n, init, h)
 ess(ans)
