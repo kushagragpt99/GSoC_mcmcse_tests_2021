@@ -4,14 +4,6 @@
 ##################################################
 set.seed(10)
 
-# Draw from multivariate normal by eigen decomposition of covariance matrix to speed up the process.
-mvt_normal <- function(n, mu, h_root) {
-  p = length(mu)
-  draws = matrix(0, nrow = p, ncol = n)
-  draws = sapply(1:n, function(t) mu + rnorm(p, 0, h_root)) 
-  draws
-}
-
 # Mean is 0 and covariance matrix is identity
 log_unnormalised_posterior <- function(X)  {
   ans = (-0.5) * sum(X^2)
@@ -25,7 +17,7 @@ RWMH <- function(n, init, h)  {
     output[1,] = init
     h_root = sqrt(h)
     for(t in 2:n) {
-      prop = mvt_normal(1, output[t-1,], h_root)
+      prop =  output[t-1,] + rnorm(p,0,h_root) 
       log_ratio = log_unnormalised_posterior(prop) - log_unnormalised_posterior(output[t-1,]) # work with log for numerical stability
       if(log(runif(1)) < log_ratio) {
         output[t,] = prop
@@ -89,7 +81,7 @@ ess <- function(chain)  {
   ess
 }
 
-n = 1e3
+n = 1e4
 p = 100
 init = numeric(p)
 h = 0.05
