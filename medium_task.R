@@ -13,7 +13,7 @@ make_AR1 <- function(n, X0, rho, tau) {
   x[1] = X0
   y = rnorm(n, sd = tau)
   for(i in 2:n) { 
-    x[i] = rho*x[i-1] + Y[i]
+    x[i] = rho*x[i-1] + y[i]
   }
 
   return(x)
