@@ -75,8 +75,8 @@ ess <- function(chain)  {
   if (min(eigen(CLT_var, only.values = TRUE)$values) <= 0)  {
     CLT_var = adjust_matrix(CLT_var, N=n) # Tweak the matrix if BM estimate is not pd
   }
-  sample_var_det = prod(eigen(sample_var, only.values = TRUE)$values^(1/p)) # Det ^ 1/p
-  CLT_var_det = prod(eigen(CLT_var, only.values = TRUE)$values^(1/p))
+  sample_var_det = exp(sum(log(eigen(sample_var, only.values = TRUE)$values))/p) # Det ^ 1/p
+  CLT_var_det = exp(sum(log(eigen(CLT_var, only.values = TRUE)$values))/p) # Using exp(log(sum(eigen))) for numerical stability.
   ess = n*(sample_var_det/CLT_var_det) # formula for ESS from Vats et al 2017
   ess
 }
